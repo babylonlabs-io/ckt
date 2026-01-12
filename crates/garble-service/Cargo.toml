@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+bitvec.workspace = true
 ckt-fmtv5-types.workspace = true
 ckt-gobble.workspace = true
 ckt-lvl.workspace = true
@@ -15,8 +16,11 @@ ckt-runner-exec.workspace = true
 rand_chacha.workspace = true
 
 [dev-dependencies]
+g16ckt = { path = "../../../g16/g16ckt" }
+g16gen = { path = "../../../g16/g16gen" }
 monoio.workspace = true
 rand.workspace = true
+tracing-subscriber = "0.3.20"
 
 [lints]
 workspace = true

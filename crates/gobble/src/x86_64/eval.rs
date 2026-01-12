@@ -88,6 +88,8 @@ impl X86_64EvaluationInstance {
             unsafe { std::mem::transmute::<[u8; 16], std::arch::x86_64::__m128i>(bytes) };
         let mut working_space = vec![Label(empty_label); config.scratch_space as usize];
 
+        working_space[0] = Label::zero();
+        working_space[1] = Label::one();
         for (label, i) in config.selected_primary_input_labels.iter().zip(2..) {
             working_space[i] = Label(unsafe {
                 std::mem::transmute::<[u8; 16], std::arch::x86_64::__m128i>(*label)
@@ -95,6 +97,8 @@ impl X86_64EvaluationInstance {
         }
 
         let mut working_space_bits = BitVec::repeat(false, config.scratch_space as usize);
+        working_space_bits.set(0, false);
+        working_space_bits.set(1, true);
         for (value, i) in config.selected_primary_input_values.iter().zip(2..) {
             working_space_bits.set(i, *value);
         }

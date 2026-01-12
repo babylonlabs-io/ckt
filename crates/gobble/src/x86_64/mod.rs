@@ -20,9 +20,27 @@ use crate::x86_64::garb::X86_64GarblingInstance;
 
 use crate::{AES128_KEY_BYTES, AES128_ROUND_KEY_BYTES};
 
+const LABEL_ZERO_BYTES: [u8; 16] = [98u8; 16];
+const LABEL_ZERO: Label = Label(unsafe { transmute::<[u8; 16], __m128i>(LABEL_ZERO_BYTES) });
+
+const LABEL_ONE_BYTES: [u8; 16] = [25u8; 16];
+const LABEL_ONE: Label = Label(unsafe { transmute::<[u8; 16], __m128i>(LABEL_ONE_BYTES) });
+
 /// x86_64-specific label type.
 #[derive(Debug, Clone, Copy)]
 pub struct Label(pub __m128i);
+
+impl Label {
+    /// Returns public constant label for zero.
+    pub const fn zero() -> Self {
+        LABEL_ZERO
+    }
+
+    /// Returns public constant label for one.
+    pub const fn one() -> Self {
+        LABEL_ONE
+    }
+}
 
 /// x86_64-specific ciphertext type.
 #[derive(Debug, Clone, Copy)]

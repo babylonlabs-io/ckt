@@ -119,6 +119,10 @@ fn lookup_wire<const IGNORE_CREDS: bool>(
                 entry.remove();
                 slab.deallocate(idx);
             }
+            0 => {
+                entry.remove();
+                slab.deallocate(idx);
+            }
             _ => entry.get_mut().credits_remaining -= 1,
         }
     }

@@ -14,6 +14,8 @@ impl X86_64ExecutionInstance {
     /// Creates a new X86_64ExecutionInstance with the given configuration.
     pub fn new<'values>(config: ExecutionInstanceConfig<'values>) -> Self {
         let mut working_space = BitVec::repeat(false, config.scratch_space as usize);
+        working_space.set(0, false);
+        working_space.set(1, true);
         for (value, i) in config.input_values.iter().zip(2..) {
             working_space.set(i, *value);
         }
