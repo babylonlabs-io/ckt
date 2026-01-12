@@ -24,7 +24,7 @@ async fn run_prealloc(args: cli::PreallocCommand) -> Result<(), Box<dyn std::err
     println!("Output: {}", args.output.display());
     println!();
 
-    prealloc::prealloc(args.input.to_str().unwrap(), args.output.to_str().unwrap()).await;
+    prealloc::prealloc(args.input.to_str().unwrap(), args.output.to_str().unwrap()).await?;
 
     println!();
     println!("Conversion complete!");

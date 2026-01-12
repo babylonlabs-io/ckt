@@ -278,6 +278,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ckt-garble-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ckt-fmtv5-types",
+ "ckt-gobble",
+ "ckt-lvl",
+ "ckt-runner-exec",
+ "monoio",
+ "rand",
+ "rand_chacha",
+]
+
+[[package]]
 name = "ckt-gobble"
 version = "0.1.0"
 dependencies = [
@@ -294,6 +308,7 @@ name = "ckt-lvl"
 version = "0.1.0"
 dependencies = [
  "ahash",
+ "anyhow",
  "ckt-fmtv5-types",
  "clap",
  "indicatif",
@@ -685,6 +700,7 @@ dependencies = [
  "ckt-gobble",
  "ckt-runner-exec",
  "ckt-runner-types",
+ "criterion",
  "indicatif",
  "monoio",
  "rand_chacha",

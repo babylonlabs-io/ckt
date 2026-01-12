@@ -1,9 +1,4 @@
-mod common;
-mod e2e;
-mod eval;
-mod exec;
-mod garble;
-
+use gobbletest::{garble_discard, test_end_to_end};
 use rand_chacha::ChaCha20Rng;
 use rand_chacha::rand_core::SeedableRng;
 
@@ -31,7 +26,7 @@ async fn main() {
                 std::process::exit(1);
             }
             let circuit = &args[2];
-            let garbler_output_labels = garble::garble_discard(circuit, &mut rng).await;
+            let garbler_output_labels = garble_discard(circuit, &mut rng).await;
             println!("{:?}", garbler_output_labels);
         }
         "e2e" => {
@@ -45,7 +40,7 @@ async fn main() {
             let circuit = &args[2];
             let inputs = &args[3];
             let garbled_path = args.get(4).map(|s| s.as_str());
-            e2e::test_end_to_end(circuit, inputs, &mut rng, garbled_path).await;
+            test_end_to_end(circuit, inputs, &mut rng, garbled_path).await;
         }
         _ => {
             eprintln!("Unknown mode: {}", mode);

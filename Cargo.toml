@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "crates/fmtv5-types",
+  "crates/garble-service",
   "crates/gobble",
   "crates/lvl",
   "crates/runner-exec",

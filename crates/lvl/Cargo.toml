@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 ahash.workspace = true
+anyhow.workspace = true
 ckt-fmtv5-types = { workspace = true, features = ["v5"] }
 clap.workspace = true
 indicatif.workspace = true

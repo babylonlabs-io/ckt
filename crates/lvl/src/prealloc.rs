@@ -1,32 +1,31 @@
 use std::collections::hash_map::Entry;
 
 use ahash::{HashMap, HashMapExt};
+use anyhow::{anyhow, Context};
 use ckt_fmtv5_types::v5::{a::reader::CircuitReaderV5a, c::*};
 use indicatif::ProgressBar;
 
 use crate::slab::FakeSlabAllocator;
 
-pub async fn prealloc(input: &str, output: &str) {
+pub async fn prealloc(input: &str, output: &str) -> anyhow::Result<()> {
     let mut slab = FakeSlabAllocator::new();
 
-    let mut reader = CircuitReaderV5a::open(input).unwrap();
+    let mut reader = CircuitReaderV5a::open(input).context("open v5a circuit")?;
     let header = reader.header();
     let mut writer = WriterV5c::new(output, header.primary_inputs, header.num_outputs)
         .await
-        .unwrap();
+        .context("create v5c writer")?;
     let mut wire_map = WireMap::new();
 
     for _ in 0..header.primary_inputs + 2 {
         slab.allocate();
     }
 
-    dbg!(reader.outputs());
-
-    let pb = ProgressBar::new(header.total_gates());
+    let pb = ProgressBar::hidden();
 
     let mut temp_count = 0;
 
-    while let Some(block) = reader.next_block_soa().await.unwrap() {
+    while let Some(block) = reader.next_block_soa().await.context("read v5a block")? {
         for i in 0..block.gates_in_block {
             let in1 = lookup_wire::<false>(
                 &mut wire_map,
@@ -34,14 +33,14 @@ pub async fn prealloc(input: &str, output: &str) {
                 block.in1[i],
                 header.primary_inputs,
             )
-            .unwrap();
+            .ok_or_else(|| anyhow!("missing wire {}", block.in1[i]))?;
             let in2 = lookup_wire::<false>(
                 &mut wire_map,
                 &mut slab,
                 block.in2[i],
                 header.primary_inputs,
             )
-            .unwrap();
+            .ok_or_else(|| anyhow!("missing wire {}", block.in2[i]))?;
 
             let out_wire_id = slab.allocate();
             wire_map.insert(
@@ -62,7 +61,7 @@ pub async fn prealloc(input: &str, output: &str) {
                     block.gate_types[i],
                 )
                 .await
-                .unwrap();
+                .context("write v5c gate")?;
         }
         temp_count += block.gates_in_block;
         if temp_count > 1_000_000 {
@@ -85,7 +84,9 @@ pub async fn prealloc(input: &str, output: &str) {
     writer
         .finalize(slab.max_allocated_concurrently() as u64, outputs)
         .await
-        .unwrap();
+        .context("finalize v5c circuit")?;
+
+    Ok(())
 }
 
 type AbsoluteWireId = u64;
@@ -108,7 +109,6 @@ fn lookup_wire<const IGNORE_CREDS: bool>(
         return Some(wire as usize);
     }
     let Entry::Occupied(mut entry) = map.entry(wire) else {
-        dbg!(wire);
         return None;
     };
 

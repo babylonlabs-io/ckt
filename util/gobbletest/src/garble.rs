@@ -104,3 +104,37 @@ pub async fn garble_discard(circuit_file: &str, rng: &mut ChaCha20Rng) -> Vec<[u
 
     output.garbler_output_labels
 }
+
+pub async fn garble_discard_quiet(circuit_file: &str, rng: &mut ChaCha20Rng) -> Vec<[u8; 16]> {
+    let mut reader = ReaderV5cWrapper::new(ReaderV5c::open(circuit_file).unwrap());
+
+    let header = *reader.header();
+
+    let labels: Vec<_> = (0..header.primary_inputs)
+        .map(|_| {
+            let mut label = [0u8; 16];
+            rng.fill_bytes(&mut label);
+            label
+        })
+        .collect();
+
+    let mut delta = [0u8; 16];
+    rng.fill_bytes(&mut delta);
+
+    let config = GarblingInstanceConfig {
+        scratch_space: header.scratch_space as u32,
+        delta,
+        primary_input_false_labels: &labels,
+    };
+
+    let task_info = GarbleTask::new(config);
+
+    // Use HashWriter with sink() to discard output while still hashing.
+    let writer = HashWriter::new(sink());
+
+    let output = process_task(&task_info, writer, &mut reader)
+        .await
+        .expect("garble_discard_quiet: process task");
+
+    output.garbler_output_labels
+}
